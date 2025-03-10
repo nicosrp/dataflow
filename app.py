@@ -1,10 +1,12 @@
 import os
-import fitz  # PyMuPDF (for PDFs)
+import fitz  # PyMuPDF for PDFs
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # Import CORS
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
-ALLOWED_EXTENSIONS = {'txt', 'pdf'}  # Add more file types if needed
+ALLOWED_EXTENSIONS = {'txt', 'pdf'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -19,13 +21,13 @@ def upload_file():
     if not allowed_file(file.filename):
         return jsonify({"message": "Invalid file type. Only .txt and .pdf allowed"}), 400
 
-    # **Handle TXT Files**
+    # Handle TXT Files
     if file.filename.endswith('.txt'):
         file_content = file.read().decode('utf-8')
         word_count = len(file_content.split())
         return jsonify({"message": f"TXT file processed! Word count: {word_count}"})
 
-    # **Handle PDF Files**
+    # Handle PDF Files
     elif file.filename.endswith('.pdf'):
         doc = fitz.open(stream=file.read(), filetype="pdf")  # Open PDF
         text = "\n".join([page.get_text() for page in doc])  # Extract text
